@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8" />
+</head>
+<body style="margin:0; padding:0; background-color:#0f0a29; font-family: Arial, Helvetica, sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#0f0a29; padding: 40px 20px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="100%" style="max-width:480px; background:#1b1440; border-radius:20px; overflow:hidden; border:1px solid #33285f;">
+
+          <!-- Header -->
+          <tr>
+            <td style="background: linear-gradient(135deg, #37e8c6, #7c5cff); padding: 32px 30px; text-align:center;">
+              <div style="width:44px; height:44px; margin:0 auto 12px; background:rgba(255,255,255,0.25); border-radius:12px; line-height:44px; font-size:20px; color:#16102f;">✦</div>
+              <h1 style="margin:0; font-size:22px; color:#16102f; font-family: Arial, sans-serif;">Welcome to <?= siteName ?>!</h1>
+            </td>
+          </tr>
+
+          <!-- Body -->
+          <tr>
+            <td style="padding: 32px 34px 10px; color:#f5f3ff;">
+              <p style="font-size:15px; line-height:1.6; margin:0 0 16px;">Hi <?= name ?>,</p>
+              <p style="font-size:15px; line-height:1.6; margin:0 0 16px; color:#c9c3e8;">
+                Thanks for creating your account. Please verify your email address by clicking the button below.
+              </p>
+            </td>
+          </tr>
+
+          <!-- Button -->
+          <tr>
+            <td style="padding: 10px 34px 26px; text-align:center;">
+              <a href="<?= verifyLink ?>"
+                 style="display:inline-block; background: linear-gradient(135deg, #37e8c6, #7c5cff); color:#16102f; text-decoration:none; font-weight:bold; font-size:15px; padding:14px 34px; border-radius:12px;">
+                Verify Email
+              </a>
+            </td>
+          </tr>
+
+          <!-- Expiry note -->
+          <tr>
+            <td style="padding: 0 34px 30px; text-align:center;">
+              <p style="font-size:13px; color:#8a82b6; margin:0;">
+                This link will expire in <?= expiryMinutes ?> minutes.
+              </p>
+            </td>
+          </tr>
+
+          <!-- Fallback link -->
+          <tr>
+            <td style="padding: 0 34px 30px; border-top:1px solid #33285f; padding-top: 20px;">
+              <p style="font-size:12px; color:#6f668f; line-height:1.5; margin:0;">
+                Button not working? Copy and paste this link into your browser:<br/>
+                <a href="<?= verifyLink ?>" style="color:#37e8c6; word-break:break-all;"><?= verifyLink ?></a>
+              </p>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="padding: 22px 34px; background:#150f38; text-align:center;">
+              <p style="font-size:12.5px; color:#6f668f; margin:0;">
+                Thank you!<br/>
+                <?= siteName ?> Team
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
