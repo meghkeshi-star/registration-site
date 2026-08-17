@@ -13,7 +13,7 @@
 //    Found in the sheet's URL:
 //    https://docs.google.com/spreadsheets/d/THIS_PART_HERE/edit
 // ------------------------------------------------------------
-const SPREADSHEET_ID = "PASTE_YOUR_SPREADSHEET_ID_HERE";
+const SPREADSHEET_ID = "1EXayVz1hJDx9_UyBie1qzU7cJvv64fTUqBDbUM9W71g";
 const SHEET_NAME = "Users";
 
 // ------------------------------------------------------------
