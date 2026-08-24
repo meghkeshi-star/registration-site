@@ -1,104 +1,323 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Create Your Account</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>ENTRY — Create Account</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+
+    <link rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Playfair+Display:wght@500;600;700&display=swap"
+          rel="stylesheet">
+
+    <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
-  <div class="bg-orbs">
-    <span class="orb orb-1"></span>
-    <span class="orb orb-2"></span>
-    <span class="orb orb-3"></span>
-    <span class="grain"></span>
-  </div>
+    <!-- Background layers -->
+    <div class="background"></div>
+    <div class="background-overlay"></div>
 
-  <main class="page">
-    <section class="card" id="registerCard">
-      <div class="card-glow"></div>
-      <div class="card-head">
-        <div class="mark">
-          <svg viewBox="0 0 24 24" width="20" height="20" fill="none">
-            <path d="M12 2 L14.5 9.5 L22 12 L14.5 14.5 L12 22 L9.5 14.5 L2 12 L9.5 9.5 Z" fill="#16102f"/>
-          </svg>
+    <!-- Decorative glow -->
+    <div class="glow glow-one"></div>
+    <div class="glow glow-two"></div>
+    <div class="noise"></div>
+
+
+    <main class="page">
+
+        <!-- Brand -->
+        <a href="#" class="brand">
+
+            <div class="brand-icon">
+                ✦
+            </div>
+
+            <span>ENTRY</span>
+
+        </a>
+
+
+        <!-- Main Glass Card -->
+        <section class="glass-card">
+
+            <div class="card-top">
+
+                <div class="status-dot"></div>
+
+                <span>IDENTITY REGISTRATION</span>
+
+            </div>
+
+
+            <div class="heading">
+
+                <p class="eyebrow">
+                    YOUR DIGITAL SPACE
+                </p>
+
+                <h1>
+                    Begin your<br>
+                    <em>journey.</em>
+                </h1>
+
+                <p class="subtitle">
+                    Create your account and verify your identity
+                    with one secure email confirmation.
+                </p>
+
+            </div>
+
+
+            <!-- Form -->
+            <form id="registrationForm" novalidate>
+
+
+                <!-- Full Name -->
+                <div class="field-group">
+
+                    <label for="fullName">
+                        FULL NAME
+                    </label>
+
+                    <div class="input-container">
+
+                        <span class="field-icon">○</span>
+
+                        <input
+                            type="text"
+                            id="fullName"
+                            placeholder="Enter your full name"
+                            autocomplete="name"
+                        >
+
+                    </div>
+
+                    <small
+                        class="error-message"
+                        id="nameError"
+                    ></small>
+
+                </div>
+
+
+                <!-- Email -->
+                <div class="field-group">
+
+                    <label for="email">
+                        EMAIL ADDRESS
+                    </label>
+
+                    <div class="input-container">
+
+                        <span class="field-icon">@</span>
+
+                        <input
+                            type="email"
+                            id="email"
+                            placeholder="you@example.com"
+                            autocomplete="email"
+                        >
+
+                    </div>
+
+                    <small
+                        class="error-message"
+                        id="emailError"
+                    ></small>
+
+                </div>
+
+
+                <!-- Password -->
+                <div class="field-group">
+
+                    <label for="password">
+                        PASSWORD
+                    </label>
+
+                    <div class="input-container">
+
+                        <span class="field-icon">✦</span>
+
+                        <input
+                            type="password"
+                            id="password"
+                            placeholder="Minimum 6 characters"
+                            autocomplete="new-password"
+                        >
+
+                        <button
+                            type="button"
+                            class="toggle-password"
+                            data-target="password"
+                        >
+                            ◉
+                        </button>
+
+                    </div>
+
+                    <small
+                        class="error-message"
+                        id="passwordError"
+                    ></small>
+
+                </div>
+
+
+                <!-- Confirm Password -->
+                <div class="field-group">
+
+                    <label for="confirmPassword">
+                        CONFIRM PASSWORD
+                    </label>
+
+                    <div class="input-container">
+
+                        <span class="field-icon">✓</span>
+
+                        <input
+                            type="password"
+                            id="confirmPassword"
+                            placeholder="Repeat your password"
+                            autocomplete="new-password"
+                        >
+
+                        <button
+                            type="button"
+                            class="toggle-password"
+                            data-target="confirmPassword"
+                        >
+                            ◉
+                        </button>
+
+                    </div>
+
+                    <small
+                        class="error-message"
+                        id="confirmPasswordError"
+                    ></small>
+
+                </div>
+
+
+                <!-- Submit -->
+                <button
+                    type="submit"
+                    class="create-button"
+                    id="submitButton"
+                >
+
+                    <span class="button-text">
+                        CREATE ACCOUNT
+                    </span>
+
+                    <span class="button-loading">
+
+                        <span class="spinner"></span>
+
+                        Creating account...
+
+                    </span>
+
+                    <span class="button-arrow">
+                        →
+                    </span>
+
+                </button>
+
+
+                <p class="login-link">
+
+                    Already have an account?
+
+                    <a href="#" id="loginLink">
+                        Login
+                    </a>
+
+                </p>
+
+
+            </form>
+
+
+            <!-- Success -->
+            <div
+                class="success-state"
+                id="successState"
+            >
+
+                <div class="success-animation">
+
+                    <div class="pulse-ring ring-1"></div>
+                    <div class="pulse-ring ring-2"></div>
+
+                    <div class="success-circle">
+                        ✓
+                    </div>
+
+                </div>
+
+
+                <p class="eyebrow">
+                    REGISTRATION COMPLETE
+                </p>
+
+                <h2>
+                    You're almost there.
+                </h2>
+
+                <p>
+                    A verification link has been sent to
+                </p>
+
+                <strong id="registeredEmail"></strong>
+
+                <div class="verification-note">
+
+                    <span>✦</span>
+
+                    Check your inbox and verify within
+                    30 minutes.
+
+                </div>
+
+            </div>
+
+
+        </section>
+
+
+        <!-- Bottom information -->
+        <div class="bottom-bar">
+
+            <span>
+                SECURE REGISTRATION
+            </span>
+
+            <div class="bottom-line"></div>
+
+            <span>
+                VERIFY • ENTER
+            </span>
+
         </div>
-        <h1>Create your account</h1>
-        <p class="sub">Join us and get started in seconds</p>
-      </div>
 
-      <form id="registerForm" novalidate>
+    </main>
 
-        <div class="field">
-          <label for="fullName">Full name</label>
-          <div class="input-wrap">
-            <span class="icon">👤</span>
-            <input type="text" id="fullName" name="fullName" placeholder="Jane Doe" autocomplete="name" />
-          </div>
-          <span class="error" id="err-fullName"></span>
-        </div>
 
-        <div class="field">
-          <label for="email">Email address</label>
-          <div class="input-wrap">
-            <span class="icon">✉️</span>
-            <input type="email" id="email" name="email" placeholder="you@example.com" autocomplete="email" />
-          </div>
-          <span class="error" id="err-email"></span>
-        </div>
+    <script>
+        const GOOGLE_SCRIPT_URL =
+            "https://script.google.com/macros/s/AKfycbzxrEONZrAK8eByvMk0_lP7dXljjqWOfRsW-4a5sFBp13qctJeurpZfSbPmADkoZ0pYuw/exec";
+    </script>
 
-        <div class="field">
-          <label for="password">Password</label>
-          <div class="input-wrap">
-            <span class="icon">🔒</span>
-            <input type="password" id="password" name="password" placeholder="At least 6 characters" autocomplete="new-password" />
-            <button type="button" class="toggle-vis" data-target="password" aria-label="Show password">👁</button>
-          </div>
-          <span class="error" id="err-password"></span>
-        </div>
+    <script src="script.js"></script>
 
-        <div class="field">
-          <label for="confirmPassword">Confirm password</label>
-          <div class="input-wrap">
-            <span class="icon">🔒</span>
-            <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Re-enter your password" autocomplete="new-password" />
-            <button type="button" class="toggle-vis" data-target="confirmPassword" aria-label="Show password">👁</button>
-          </div>
-          <span class="error" id="err-confirmPassword"></span>
-        </div>
-
-        <button type="submit" class="btn-primary" id="submitBtn">
-          <span class="btn-label">Create account</span>
-          <span class="btn-spinner" hidden></span>
-        </button>
-
-        <p class="banner" id="formBanner" hidden></p>
-      </form>
-
-      <p class="footnote">Already have an account? <a href="#">Log in</a></p>
-    </section>
-
-    <!-- Post-submit success state -->
-    <section class="card result-card" id="successCard" hidden>
-      <div class="card-glow"></div>
-      <div class="result-icon success">
-        <svg viewBox="0 0 52 52" width="30" height="30">
-          <circle class="check-circle" cx="26" cy="26" r="23" fill="none"/>
-          <path class="check-mark" fill="none" d="M14 27 L22 35 L38 17"/>
-        </svg>
-      </div>
-      <h2>Check your inbox</h2>
-      <p class="sub">
-        We've sent a verification link to <strong id="sentToEmail">your email</strong>.
-        Click it to activate your account. The link expires in 30 minutes.
-      </p>
-      <a href="verify.html" class="btn-ghost">Didn't get it? Resend email</a>
-    </section>
-  </main>
-
-  <script src="script.js"></script>
 </body>
 </html>
