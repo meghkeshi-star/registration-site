@@ -1,248 +1,782 @@
-/**
- * ============================================================
- *  REGISTRATION + EMAIL VERIFICATION — Google Apps Script backend
- * ============================================================
- *  Sheet: "Users"
- *  Columns (in this exact order):
- *  ID | Name | Email | PasswordHash | Verification Token | Token Expiry | Verified | Created At
- * ============================================================
- */
+/* =====================================================
+   CONFIGURATION
+===================================================== */
 
-// ------------------------------------------------------------
-// 1. PASTE YOUR GOOGLE SHEET ID HERE (one place, easy to change)
-//    Found in the sheet's URL:
-//    https://docs.google.com/spreadsheets/d/THIS_PART_HERE/edit
-// ------------------------------------------------------------
 const SPREADSHEET_ID = "1EXayVz1hJDx9_UyBie1qzU7cJvv64fTUqBDbUM9W71g";
+
 const SHEET_NAME = "Users";
 
-// ------------------------------------------------------------
-// 2. PASTE YOUR DEPLOYED WEB APP URL HERE (used inside the email
-//    button link, and for the verify/resend pages). Fill this in
-//    AFTER your first deployment, then redeploy.
-// ------------------------------------------------------------
-const VERIFY_PAGE_URL = "https://meghkeshi-star.github.io/registration-site/verify.html";
-
-// How long a verification link stays valid, in minutes.
 const TOKEN_EXPIRY_MINUTES = 30;
 
-// Site name shown in the email.
-const SITE_NAME = "My Website";
 
-// ------------------------------------------------------------
-// Sheet helper
-// ------------------------------------------------------------
-function getUsersSheet() {
-  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
-  let sheet = ss.getSheetByName(SHEET_NAME);
+/* =====================================================
+   WEB APP
+===================================================== */
 
-  if (!sheet) {
-    sheet = ss.insertSheet(SHEET_NAME);
+/*
+  Handles:
+  - GET requests for verification links
+  - POST requests from the registration website
+*/
+
+
+function doGet(e) {
+
+  const token = e.parameter.token;
+
+
+  /*
+    If the URL has ?token=...
+    show the verification page.
+  */
+
+  if (token) {
+
+    const template =
+      HtmlService.createTemplateFromFile("verify.html");
+
+
+    return template
+      .evaluate()
+      .setTitle("Verify Email — Entry")
+      .setXFrameOptionsMode(
+        HtmlService.XFrameOptionsMode.ALLOWALL
+      );
+
   }
 
-  if (sheet.getLastRow() === 0) {
-    sheet.appendRow([
-      "ID", "Name", "Email", "PasswordHash",
-      "Verification Token", "Token Expiry", "Verified", "Created At"
-    ]);
-  }
 
-  return sheet;
+  /*
+    Simple fallback page.
+  */
+
+  return HtmlService
+    .createHtmlOutput(
+      "<h2>Entry Verification Service</h2>"
+    );
+
 }
 
-// Column indexes (1-based, matching the header row above)
-const COL = {
-  ID: 1,
-  NAME: 2,
-  EMAIL: 3,
-  PASSWORD_HASH: 4,
-  TOKEN: 5,
-  TOKEN_EXPIRY: 6,
-  VERIFIED: 7,
-  CREATED_AT: 8
-};
 
-// ------------------------------------------------------------
-// Web app entry point — routes every request based on `action`
-// ------------------------------------------------------------
+/* =====================================================
+   POST: REGISTER USER
+===================================================== */
+
 function doPost(e) {
-  let result;
 
   try {
-    const action = e.parameter.action;
 
-    if (action === "registerUser") {
-      result = registerUser(e.parameter.name, e.parameter.email, e.parameter.passwordHash);
-    } else if (action === "verifyEmail") {
-      result = verifyEmail(e.parameter.token);
-    } else if (action === "resendVerification") {
-      result = resendVerification(e.parameter.email);
-    } else {
-      result = { success: false, message: "Unknown action." };
+    const data = JSON.parse(e.postData.contents);
+
+
+    if (data.action === "register") {
+
+      const result = registerUser(data);
+
+      return ContentService
+        .createTextOutput(
+          JSON.stringify(result)
+        )
+        .setMimeType(
+          ContentService.MimeType.JSON
+        );
+
     }
-  } catch (err) {
-    result = { success: false, message: "Server error: " + err.message };
+
+
+    return ContentService
+      .createTextOutput(
+        JSON.stringify({
+          success: false,
+          message: "Unknown action."
+        })
+      )
+      .setMimeType(
+        ContentService.MimeType.JSON
+      );
+
+
+  } catch (error) {
+
+    console.error(error);
+
+
+    return ContentService
+      .createTextOutput(
+        JSON.stringify({
+          success: false,
+          message: error.message
+        })
+      )
+      .setMimeType(
+        ContentService.MimeType.JSON
+      );
+
   }
 
-  return ContentService
-    .createTextOutput(JSON.stringify(result))
-    .setMimeType(ContentService.MimeType.JSON);
 }
 
-// Lets you open the web app URL directly in a browser to confirm it's alive.
-function doGet(e) {
-  return ContentService
-    .createTextOutput(JSON.stringify({ status: "Apps Script web app is running." }))
-    .setMimeType(ContentService.MimeType.JSON);
-}
 
-// ------------------------------------------------------------
-// Utilities
-// ------------------------------------------------------------
-function generateToken() {
-  return Utilities.getUuid().replace(/-/g, "");
-}
+/* =====================================================
+   REGISTER USER
+===================================================== */
 
-function findRowByEmail(sheet, email) {
-  const data = sheet.getDataRange().getValues();
-  const normalizedEmail = email.trim().toLowerCase();
+function registerUser(data) {
 
-  for (let row = 1; row < data.length; row++) {
-    if (String(data[row][COL.EMAIL - 1]).trim().toLowerCase() === normalizedEmail) {
-      return row + 1; // convert to 1-based sheet row number
-    }
+  const name =
+    String(data.name || "").trim();
+
+  const email =
+    String(data.email || "")
+      .trim()
+      .toLowerCase();
+
+  const passwordHash =
+    String(data.passwordHash || "").trim();
+
+
+  /*
+    Server-side validation
+  */
+
+  if (!name) {
+    throw new Error("Name is required.");
   }
-  return -1;
-}
 
-function findRowByToken(sheet, token) {
-  const data = sheet.getDataRange().getValues();
 
-  for (let row = 1; row < data.length; row++) {
-    if (String(data[row][COL.TOKEN - 1]) === token) {
-      return row + 1;
-    }
+  if (!isValidEmail(email)) {
+    throw new Error("Invalid email address.");
   }
-  return -1;
-}
 
-// ------------------------------------------------------------
-// 1) REGISTER USER
-// ------------------------------------------------------------
-function registerUser(name, email, passwordHash) {
-  name = (name || "").trim();
-  email = (email || "").trim().toLowerCase();
 
-  if (!name || !email || !passwordHash) {
-    return { success: false, message: "All fields are required." };
+  if (!passwordHash) {
+    throw new Error("Password hash is required.");
   }
+
 
   const sheet = getUsersSheet();
-  const existingRow = findRowByEmail(sheet, email);
 
-  if (existingRow !== -1) {
-    const alreadyVerified = sheet.getRange(existingRow, COL.VERIFIED).getValue();
-    if (alreadyVerified === true || alreadyVerified === "TRUE") {
-      return { success: false, message: "An account with this email already exists." };
+  const lastRow = sheet.getLastRow();
+
+
+  /*
+    Check whether email already exists.
+  */
+
+  if (lastRow > 1) {
+
+    const emails =
+      sheet
+        .getRange(2, 3, lastRow - 1, 1)
+        .getValues()
+        .flat()
+        .map(value =>
+          String(value).toLowerCase()
+        );
+
+
+    if (emails.includes(email)) {
+
+      return {
+        success: false,
+        message:
+          "An account with this email already exists."
+      };
+
     }
-    // Not verified yet — just send a fresh verification email instead of
-    // creating a duplicate row.
-    return resendVerification(email);
+
   }
 
-  const id = Utilities.getUuid();
-  const token = generateToken();
-  const expiry = new Date(Date.now() + TOKEN_EXPIRY_MINUTES * 60 * 1000);
 
-  sheet.appendRow([id, name, email, passwordHash, token, expiry, false, new Date()]);
+  /*
+    Generate ID
+  */
 
-  sendVerificationEmail(name, email, token);
+  const id =
+    Utilities.getUuid();
 
-  return { success: true, message: "Account created. Please check your email to verify." };
+
+  /*
+    Generate secure verification token
+  */
+
+  const token =
+    generateVerificationToken();
+
+
+  /*
+    30-minute expiry
+  */
+
+  const expiry =
+    new Date(
+      Date.now() +
+      TOKEN_EXPIRY_MINUTES * 60 * 1000
+    );
+
+
+  const createdAt =
+    new Date();
+
+
+  /*
+    Add user row
+
+    Columns:
+    ID
+    Name
+    Email
+    Password Hash
+    Verification Token
+    Token Expiry
+    Verified
+    Created At
+  */
+
+  sheet.appendRow([
+
+    id,
+
+    name,
+
+    email,
+
+    passwordHash,
+
+    token,
+
+    expiry,
+
+    false,
+
+    createdAt
+
+  ]);
+
+
+  /*
+    Send verification email
+  */
+
+  sendVerificationEmail(
+    name,
+    email,
+    token
+  );
+
+
+  return {
+
+    success: true,
+
+    message:
+      "Account created. Please check your email."
+
+  };
+
 }
 
-// ------------------------------------------------------------
-// 2) VERIFY EMAIL
-// ------------------------------------------------------------
+
+/* =====================================================
+   VERIFY EMAIL
+===================================================== */
+
 function verifyEmail(token) {
+
   if (!token) {
-    return { success: false, message: "Missing token." };
+
+    return {
+      success: false,
+      expired: false,
+      message: "Missing verification token."
+    };
+
   }
 
-  const sheet = getUsersSheet();
-  const row = findRowByToken(sheet, token);
 
-  if (row === -1) {
-    return { success: false, message: "Invalid or unknown verification link." };
+  const sheet =
+    getUsersSheet();
+
+  const lastRow =
+    sheet.getLastRow();
+
+
+  if (lastRow < 2) {
+
+    return {
+      success: false,
+      expired: false,
+      message: "No account was found."
+    };
+
   }
 
-  const expiry = new Date(sheet.getRange(row, COL.TOKEN_EXPIRY).getValue());
-  const alreadyVerified = sheet.getRange(row, COL.VERIFIED).getValue();
 
-  if (alreadyVerified === true || alreadyVerified === "TRUE") {
-    return { success: true, message: "Email already verified." };
+  /*
+    Get all rows except header.
+  */
+
+  const data =
+    sheet
+      .getRange(
+        2,
+        1,
+        lastRow - 1,
+        8
+      )
+      .getValues();
+
+
+  for (
+    let index = 0;
+    index < data.length;
+    index++
+  ) {
+
+    const row = data[index];
+
+    const verificationToken = row[4];
+    const tokenExpiry = row[5];
+    const verified = row[6];
+
+
+    /*
+      Match token.
+    */
+
+    if (verificationToken === token) {
+
+      /*
+        Already verified.
+      */
+
+      if (
+        verified === true ||
+        String(verified).toUpperCase() === "TRUE"
+      ) {
+
+        return {
+          success: true,
+          message:
+            "Your email has already been verified."
+        };
+
+      }
+
+
+      const expiryDate =
+        new Date(tokenExpiry);
+
+
+      /*
+        Expired.
+      */
+
+      if (
+        new Date() > expiryDate
+      ) {
+
+        return {
+          success: false,
+          expired: true,
+          message:
+            "This verification stamp expired after 30 minutes."
+        };
+
+      }
+
+
+      /*
+        Mark verified.
+      */
+
+      const actualRow =
+        index + 2;
+
+
+      sheet
+        .getRange(actualRow, 7)
+        .setValue(true);
+
+
+      /*
+        Optional:
+        Clear the token after successful use.
+      */
+
+      sheet
+        .getRange(actualRow, 5)
+        .setValue("");
+
+
+      sheet
+        .getRange(actualRow, 6)
+        .setValue("");
+
+
+      return {
+
+        success: true,
+
+        message:
+          "Email successfully verified."
+
+      };
+
+    }
+
   }
 
-  if (new Date() > expiry) {
-    return { success: false, message: "This verification link has expired." };
-  }
 
-  sheet.getRange(row, COL.VERIFIED).setValue(true);
-  sheet.getRange(row, COL.TOKEN).setValue(""); // token can't be reused
+  return {
 
-  return { success: true, message: "Email verified successfully." };
+    success: false,
+
+    expired: false,
+
+    message:
+      "This verification link is invalid or has already been replaced."
+
+  };
+
 }
 
-// ------------------------------------------------------------
-// 3) RESEND VERIFICATION
-// ------------------------------------------------------------
+
+/* =====================================================
+   RESEND VERIFICATION
+===================================================== */
+
 function resendVerification(email) {
-  email = (email || "").trim().toLowerCase();
 
-  if (!email) {
-    return { success: false, message: "Please enter your email address." };
+  email =
+    String(email || "")
+      .trim()
+      .toLowerCase();
+
+
+  if (!isValidEmail(email)) {
+
+    return {
+      success: false,
+      message:
+        "Please enter a valid email address."
+    };
+
   }
 
-  const sheet = getUsersSheet();
-  const row = findRowByEmail(sheet, email);
 
-  if (row === -1) {
-    return { success: false, message: "We couldn't find an account with that email." };
+  const sheet =
+    getUsersSheet();
+
+  const lastRow =
+    sheet.getLastRow();
+
+
+  if (lastRow < 2) {
+
+    return {
+      success: false,
+      message:
+        "No account was found with this email."
+    };
+
   }
 
-  const alreadyVerified = sheet.getRange(row, COL.VERIFIED).getValue();
-  if (alreadyVerified === true || alreadyVerified === "TRUE") {
-    return { success: false, message: "This email is already verified. Try logging in." };
+
+  const data =
+    sheet
+      .getRange(
+        2,
+        1,
+        lastRow - 1,
+        8
+      )
+      .getValues();
+
+
+  for (
+    let index = 0;
+    index < data.length;
+    index++
+  ) {
+
+    const row = data[index];
+
+    const rowEmail =
+      String(row[2])
+        .toLowerCase();
+
+    const verified =
+      row[6];
+
+
+    if (rowEmail === email) {
+
+      /*
+        Do not resend if already verified.
+      */
+
+      if (
+        verified === true ||
+        String(verified).toUpperCase() === "TRUE"
+      ) {
+
+        return {
+          success: false,
+          message:
+            "This email has already been verified."
+        };
+
+      }
+
+
+      /*
+        New token + new expiry.
+      */
+
+      const newToken =
+        generateVerificationToken();
+
+
+      const newExpiry =
+        new Date(
+          Date.now() +
+          TOKEN_EXPIRY_MINUTES * 60 * 1000
+        );
+
+
+      const actualRow =
+        index + 2;
+
+
+      sheet
+        .getRange(actualRow, 5)
+        .setValue(newToken);
+
+
+      sheet
+        .getRange(actualRow, 6)
+        .setValue(newExpiry);
+
+
+      /*
+        Send email again.
+      */
+
+      sendVerificationEmail(
+
+        row[1],
+
+        email,
+
+        newToken
+
+      );
+
+
+      return {
+
+        success: true,
+
+        message:
+          "A new verification email has been sent."
+
+      };
+
+    }
+
   }
 
-  const newToken = generateToken();
-  const newExpiry = new Date(Date.now() + TOKEN_EXPIRY_MINUTES * 60 * 1000);
 
-  sheet.getRange(row, COL.TOKEN).setValue(newToken);
-  sheet.getRange(row, COL.TOKEN_EXPIRY).setValue(newExpiry);
+  /*
+    Generic wording can be preferable in a real production
+    system to avoid revealing whether an email is registered.
+  */
 
-  const name = sheet.getRange(row, COL.NAME).getValue();
-  sendVerificationEmail(name, email, newToken);
+  return {
 
-  return { success: true, message: "Verification email sent." };
+    success: false,
+
+    message:
+      "No account was found with this email."
+
+  };
+
 }
 
-// ------------------------------------------------------------
-// Email sending
-// ------------------------------------------------------------
-function sendVerificationEmail(name, email, token) {
-  const verifyLink = VERIFY_PAGE_URL + "?token=" + token;
 
-  const template = HtmlService.createTemplateFromFile("Email");
-  template.name = name;
-  template.verifyLink = verifyLink;
-  template.siteName = SITE_NAME;
-  template.expiryMinutes = TOKEN_EXPIRY_MINUTES;
+/* =====================================================
+   SEND VERIFICATION EMAIL
+===================================================== */
 
-  const htmlBody = template.evaluate().getContent();
+function sendVerificationEmail(
+  name,
+  email,
+  token
+) {
 
-  GmailApp.sendEmail(email, "Verify your email for " + SITE_NAME, "", {
-    htmlBody: htmlBody,
-    name: SITE_NAME
-  });
+  /*
+    Get current deployed Web App URL automatically.
+  */
+
+  const webAppUrl =
+    ScriptApp.getService().getUrl();
+
+
+  const verificationUrl =
+    webAppUrl +
+    "?token=" +
+    encodeURIComponent(token);
+
+
+  /*
+    Load Email.html template.
+  */
+
+  const template =
+    HtmlService.createTemplateFromFile(
+      "Email"
+    );
+
+
+  template.name =
+    name;
+
+  template.verificationUrl =
+    verificationUrl;
+
+
+  const htmlBody =
+    template.evaluate()
+      .getContent();
+
+
+  GmailApp.sendEmail(
+
+    email,
+
+    "Your ENTRY verification stamp",
+
+    "Please verify your email by opening this link: " +
+    verificationUrl,
+
+    {
+      htmlBody: htmlBody,
+      name: "ENTRY"
+    }
+
+  );
+
+}
+
+
+/* =====================================================
+   GENERATE TOKEN
+===================================================== */
+
+function generateVerificationToken() {
+
+  /*
+    UUIDs combined together create a long,
+    unpredictable token.
+  */
+
+  return (
+    Utilities.getUuid().replace(/-/g, "") +
+    Utilities.getUuid().replace(/-/g, "")
+  );
+
+}
+
+
+/* =====================================================
+   GET USERS SHEET
+===================================================== */
+
+function getUsersSheet() {
+
+  const spreadsheet =
+    SpreadsheetApp.openById(
+      SPREADSHEET_ID
+    );
+
+
+  let sheet =
+    spreadsheet.getSheetByName(
+      SHEET_NAME
+    );
+
+
+  /*
+    Create sheet automatically if it does not exist.
+  */
+
+  if (!sheet) {
+
+    sheet =
+      spreadsheet.insertSheet(
+        SHEET_NAME
+      );
+
+
+    sheet.appendRow([
+
+      "ID",
+
+      "Name",
+
+      "Email",
+
+      "Password Hash",
+
+      "Verification Token",
+
+      "Token Expiry",
+
+      "Verified",
+
+      "Created At"
+
+    ]);
+
+
+    sheet
+      .getRange("A1:H1")
+      .setFontWeight("bold");
+
+    sheet
+      .setFrozenRows(1);
+
+  }
+
+
+  return sheet;
+
+}
+
+
+/* =====================================================
+   EMAIL VALIDATION
+===================================================== */
+
+function isValidEmail(email) {
+
+  const pattern =
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  return pattern.test(email);
+
+}
+
+
+/* =====================================================
+   INCLUDE HTML FILE
+===================================================== */
+
+function include(filename) {
+
+  return HtmlService
+    .createHtmlOutputFromFile(filename)
+    .getContent();
+
 }
