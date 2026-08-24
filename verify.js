@@ -1,7 +1,7 @@
 // ============================================================
 // PASTE YOUR GOOGLE APPS SCRIPT WEB APP URL HERE (same as script.js)
 // ============================================================
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyaZwGzzsPV1QTzX2hJz83F4tgRxPZ1pPs_vxdTJn4YJZ1ffb8CW1qwZX1rN-aAzsITbw/exec";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzxrEONZrAK8eByvMk0_lP7dXljjqWOfRsW-4a5sFBp13qctJeurpZfSbPmADkoZ0pYuw/exec";
 
 function $(id) { return document.getElementById(id); }
 
