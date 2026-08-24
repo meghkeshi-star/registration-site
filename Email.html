@@ -1,74 +1,248 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-<meta charset="UTF-8" />
+  <meta charset="UTF-8">
 </head>
-<body style="margin:0; padding:0; background-color:#0f0a29; font-family: Arial, Helvetica, sans-serif;">
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#0f0a29; padding: 40px 20px;">
+
+<body
+  style="
+    margin:0;
+    padding:0;
+    background:#ece7da;
+    font-family:Arial, Helvetica, sans-serif;
+  "
+>
+
+  <table
+    width="100%"
+    cellpadding="0"
+    cellspacing="0"
+    border="0"
+    style="
+      background:#ece7da;
+      padding:35px 15px;
+    "
+  >
+
     <tr>
+
       <td align="center">
-        <table role="presentation" width="100%" style="max-width:480px; background:#1b1440; border-radius:20px; overflow:hidden; border:1px solid #33285f;">
+
+        <table
+          width="100%"
+          cellpadding="0"
+          cellspacing="0"
+          border="0"
+          style="
+            max-width:600px;
+            background:#fffdf7;
+            border:1px solid #b9b09f;
+          "
+        >
+
 
           <!-- Header -->
+
           <tr>
-            <td style="background: linear-gradient(135deg, #37e8c6, #7c5cff); padding: 32px 30px; text-align:center;">
-              <div style="width:44px; height:44px; margin:0 auto 12px; background:rgba(255,255,255,0.25); border-radius:12px; line-height:44px; font-size:20px; color:#16102f;">✦</div>
-              <h1 style="margin:0; font-size:22px; color:#16102f; font-family: Arial, sans-serif;">Welcome to <?= siteName ?>!</h1>
+
+            <td
+              style="
+                background:#17201c;
+                padding:35px;
+                text-align:center;
+              "
+            >
+
+              <div
+                style="
+                  width:45px;
+                  height:45px;
+                  line-height:45px;
+                  border:1px solid #b99b5e;
+                  border-radius:50%;
+                  margin:0 auto 14px;
+                  color:#b99b5e;
+                  font-size:20px;
+                "
+              >
+                ✦
+              </div>
+
+              <div
+                style="
+                  color:#ece7da;
+                  font-size:12px;
+                  letter-spacing:5px;
+                "
+              >
+                ENTRY
+              </div>
+
             </td>
+
           </tr>
+
 
           <!-- Body -->
+
           <tr>
-            <td style="padding: 32px 34px 10px; color:#f5f3ff;">
-              <p style="font-size:15px; line-height:1.6; margin:0 0 16px;">Hi <?= name ?>,</p>
-              <p style="font-size:15px; line-height:1.6; margin:0 0 16px; color:#c9c3e8;">
-                Thanks for creating your account. Please verify your email address by clicking the button below.
+
+            <td
+              style="
+                padding:45px 35px;
+                color:#17201c;
+              "
+            >
+
+              <p
+                style="
+                  margin:0 0 18px;
+                  color:#b99b5e;
+                  font-size:10px;
+                  letter-spacing:2px;
+                "
+              >
+                EMAIL VERIFICATION
               </p>
+
+
+              <h1
+                style="
+                  margin:0;
+                  font-family:Georgia, serif;
+                  font-size:32px;
+                  font-weight:normal;
+                  line-height:1.3;
+                "
+              >
+                Your passport is waiting.
+              </h1>
+
+
+              <p
+                style="
+                  margin:24px 0;
+                  color:#666b65;
+                  font-size:15px;
+                  line-height:1.8;
+                "
+              >
+                Hello <?= name ?>,
+                <br><br>
+                Your account has been created.
+                One final stamp is needed before your
+                entry is complete.
+              </p>
+
+
+              <!-- Button -->
+
+              <table
+                cellpadding="0"
+                cellspacing="0"
+                border="0"
+                style="
+                  margin:30px 0;
+                "
+              >
+
+                <tr>
+
+                  <td
+                    align="center"
+                    style="
+                      background:#712f35;
+                    "
+                  >
+
+                    <a
+                      href="<?= verificationUrl ?>"
+                      style="
+                        display:inline-block;
+                        padding:16px 26px;
+                        color:#ece7da;
+                        text-decoration:none;
+                        font-size:11px;
+                        letter-spacing:1.5px;
+                      "
+                    >
+                      VERIFY EMAIL →
+                    </a>
+
+                  </td>
+
+                </tr>
+
+              </table>
+
+
+              <p
+                style="
+                  margin:0;
+                  color:#666b65;
+                  font-size:12px;
+                  line-height:1.8;
+                "
+              >
+                This verification link expires in
+                <strong>30 minutes</strong>.
+              </p>
+
+
+              <hr
+                style="
+                  border:none;
+                  border-top:1px solid #d9d1c0;
+                  margin:32px 0;
+                "
+              >
+
+
+              <p
+                style="
+                  margin:0;
+                  color:#8d9189;
+                  font-size:10px;
+                  line-height:1.7;
+                "
+              >
+                If you did not create this account,
+                you can safely ignore this email.
+              </p>
+
             </td>
+
           </tr>
 
-          <!-- Button -->
-          <tr>
-            <td style="padding: 10px 34px 26px; text-align:center;">
-              <a href="<?= verifyLink ?>"
-                 style="display:inline-block; background: linear-gradient(135deg, #37e8c6, #7c5cff); color:#16102f; text-decoration:none; font-weight:bold; font-size:15px; padding:14px 34px; border-radius:12px;">
-                Verify Email
-              </a>
-            </td>
-          </tr>
-
-          <!-- Expiry note -->
-          <tr>
-            <td style="padding: 0 34px 30px; text-align:center;">
-              <p style="font-size:13px; color:#8a82b6; margin:0;">
-                This link will expire in <?= expiryMinutes ?> minutes.
-              </p>
-            </td>
-          </tr>
-
-          <!-- Fallback link -->
-          <tr>
-            <td style="padding: 0 34px 30px; border-top:1px solid #33285f; padding-top: 20px;">
-              <p style="font-size:12px; color:#6f668f; line-height:1.5; margin:0;">
-                Button not working? Copy and paste this link into your browser:<br/>
-                <a href="<?= verifyLink ?>" style="color:#37e8c6; word-break:break-all;"><?= verifyLink ?></a>
-              </p>
-            </td>
-          </tr>
 
           <!-- Footer -->
+
           <tr>
-            <td style="padding: 22px 34px; background:#150f38; text-align:center;">
-              <p style="font-size:12.5px; color:#6f668f; margin:0;">
-                Thank you!<br/>
-                <?= siteName ?> Team
-              </p>
+
+            <td
+              style="
+                padding:20px;
+                text-align:center;
+                border-top:1px solid #d9d1c0;
+                color:#8d9189;
+                font-size:9px;
+                letter-spacing:1px;
+              "
+            >
+              ENTRY / DIGITAL IDENTITY SERVICE
             </td>
+
           </tr>
 
         </table>
+
       </td>
+
     </tr>
+
   </table>
+
 </body>
+
 </html>
