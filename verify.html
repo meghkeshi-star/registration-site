@@ -5,96 +5,83 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Verify your email</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-  <main class="frame">
+  <div class="bg-orbs">
+    <span class="orb orb-1"></span>
+    <span class="orb orb-2"></span>
+    <span class="orb orb-3"></span>
+    <span class="grain"></span>
+  </div>
 
-    <section class="panel-brand">
-      <div class="panel-inner">
-        <span class="eyebrow">MEMBER REGISTRY</span>
-        <h1 class="headline">One click<br/>to make it<br/>official.</h1>
-        <p class="tagline">Every registration gets a stamp of approval once the link in your inbox is confirmed.</p>
+  <main class="page">
 
-        <div class="stamp" aria-hidden="true">
-          <svg viewBox="0 0 160 160" width="128" height="128">
-            <circle cx="80" cy="80" r="72" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="3 5"/>
-            <circle cx="80" cy="80" r="60" fill="none" stroke="currentColor" stroke-width="1.5"/>
-            <path id="stampCircleTop2" fill="none" d="M 80,20 A 60,60 0 0 1 140,80"/>
-            <path id="stampCircleBot2" fill="none" d="M 20,80 A 60,60 0 0 1 80,140"/>
-            <text font-family="IBM Plex Mono" font-size="10.5" letter-spacing="3" fill="currentColor">
-              <textPath href="#stampCircleTop2" startOffset="2">VERIFIED · SECURE</textPath>
-            </text>
-            <text font-family="IBM Plex Mono" font-size="10.5" letter-spacing="3" fill="currentColor">
-              <textPath href="#stampCircleBot2" startOffset="2">EST. TODAY</textPath>
-            </text>
-            <path d="M55 82 L72 98 L106 60" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </div>
-      </div>
+    <!-- Checking token -->
+    <section class="card result-card" id="checkingCard">
+      <div class="spinner-lg"></div>
+      <h2>Verifying your email...</h2>
+      <p>Hang tight, this only takes a second.</p>
     </section>
 
-    <section class="panel-form">
-
-      <!-- Checking token -->
-      <div class="stub result-stub" id="checkingCard">
-        <div class="stub-notch stub-notch-top"></div>
-        <div class="spinner-lg"></div>
-        <h2>Verifying your email...</h2>
-        <p>Hang tight, this only takes a second.</p>
+    <!-- Success -->
+    <section class="card result-card" id="verifiedCard" hidden>
+      <div class="card-glow"></div>
+      <div class="result-icon success">
+        <svg viewBox="0 0 52 52" width="30" height="30">
+          <circle class="check-circle" cx="26" cy="26" r="23" fill="none"/>
+          <path class="check-mark" fill="none" d="M14 27 L22 35 L38 17"/>
+        </svg>
       </div>
+      <h2>Email verified!</h2>
+      <p>Your email has been successfully verified. You can now continue to the website.</p>
+      <a href="index.html" class="btn-ghost">Continue</a>
+    </section>
 
-      <!-- Success -->
-      <div class="stub result-stub" id="verifiedCard" hidden>
-        <div class="stub-notch stub-notch-top"></div>
-        <div class="result-stamp success">
-          <svg viewBox="0 0 52 52" width="36" height="36">
-            <circle class="check-circle" cx="26" cy="26" r="23" fill="none"/>
-            <path class="check-mark" fill="none" d="M14 27 L22 35 L38 17"/>
+    <!-- Invalid / expired -->
+    <section class="card result-card" id="invalidCard" hidden>
+      <div class="card-glow"></div>
+      <div class="result-icon error">!</div>
+      <h2>Oops!</h2>
+      <p>This verification link is invalid or has expired. Please request a new verification email.</p>
+      <button type="button" class="btn-ghost" id="showResendBtn" style="border:none; cursor:pointer;">Resend email</button>
+    </section>
+
+    <!-- Resend form (shown when no token in URL, or after clicking "Resend email") -->
+    <section class="card" id="resendCard" hidden>
+      <div class="card-glow"></div>
+      <div class="card-head">
+        <div class="mark">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none">
+            <path d="M3 6h18v12H3z" stroke="#16102f" stroke-width="1.6" stroke-linejoin="round"/>
+            <path d="M3 7l9 6 9-6" stroke="#16102f" stroke-width="1.6" stroke-linejoin="round"/>
           </svg>
         </div>
-        <h2>Email verified!</h2>
-        <p>Your email has been successfully verified. You can now continue to the website.</p>
-        <a href="index.html" class="btn-ghost">Continue</a>
+        <h1>Resend verification</h1>
+        <p class="sub">Enter your email and we'll send a new link</p>
       </div>
 
-      <!-- Invalid / expired -->
-      <div class="stub result-stub" id="invalidCard" hidden>
-        <div class="stub-notch stub-notch-top"></div>
-        <div class="result-stamp error">!</div>
-        <h2>Oops!</h2>
-        <p>This verification link is invalid or has expired. Please request a new verification email.</p>
-        <button type="button" class="btn-ghost" id="showResendBtn" style="border:1.5px solid var(--forest); background:transparent; cursor:pointer;">Resend email</button>
-      </div>
-
-      <!-- Resend form -->
-      <div class="stub" id="resendCard" hidden>
-        <div class="stub-notch stub-notch-top"></div>
-        <div class="stub-head">
-          <span class="eyebrow small">RESEND LINK</span>
-          <h2>Resend verification</h2>
-          <p class="sub">Enter your email and we'll send a new link</p>
-        </div>
-
-        <form id="resendForm" novalidate>
-          <div class="field">
-            <label for="resendEmail">Email address</label>
+      <form id="resendForm" novalidate>
+        <div class="field">
+          <label for="resendEmail">Email address</label>
+          <div class="input-wrap">
+            <span class="icon">✉️</span>
             <input type="email" id="resendEmail" name="resendEmail" placeholder="you@example.com" autocomplete="email" />
-            <span class="error" id="err-resendEmail"></span>
           </div>
+          <span class="error" id="err-resendEmail"></span>
+        </div>
 
-          <button type="submit" class="btn-primary" id="resendBtn">
-            <span class="btn-label">Resend verification email</span>
-            <span class="btn-spinner" hidden></span>
-          </button>
+        <button type="submit" class="btn-primary" id="resendBtn">
+          <span class="btn-label">Resend verification email</span>
+          <span class="btn-spinner" hidden></span>
+        </button>
 
-          <p class="banner" id="resendBanner" hidden></p>
-        </form>
-      </div>
-
+        <p class="banner" id="resendBanner" hidden></p>
+      </form>
     </section>
+
   </main>
 
   <script src="verify.js"></script>
