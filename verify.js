@@ -1,100 +1,187 @@
-// ============================================================
-// PASTE YOUR GOOGLE APPS SCRIPT WEB APP URL HERE (same as script.js)
-// ============================================================
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzxrEONZrAK8eByvMk0_lP7dXljjqWOfRsW-4a5sFBp13qctJeurpZfSbPmADkoZ0pYuw/exec";
+<script>
 
-function $(id) { return document.getElementById(id); }
+const params = new URLSearchParams(window.location.search);
 
-function showOnly(id) {
-  ["checkingCard", "verifiedCard", "invalidCard", "resendCard"].forEach((cardId) => {
-    $(cardId).hidden = cardId !== id;
-  });
+const token = params.get("token");
+
+const title = document.getElementById("title");
+const message = document.getElementById("message");
+const label = document.getElementById("label");
+const seal = document.getElementById("seal");
+
+const resendSection =
+  document.getElementById("resendSection");
+
+const resendEmail =
+  document.getElementById("resendEmail");
+
+const resendButton =
+  document.getElementById("resendButton");
+
+const resendStatus =
+  document.getElementById("resendStatus");
+
+
+function showResend() {
+
+  resendSection.style.display = "block";
+
 }
 
-// ------------------------------------------------------------
-// On load: check for a token in the URL
-// ------------------------------------------------------------
-(async function init() {
-  const params = new URLSearchParams(window.location.search);
-  const token = params.get("token");
+
+function verifyToken() {
 
   if (!token) {
-    // No token — go straight to the resend form
-    showOnly("resendCard");
+
+    label.textContent = "INVALID LINK";
+
+    title.textContent =
+      "This verification link is incomplete.";
+
+    message.textContent =
+      "Please request a new verification email.";
+
+    seal.textContent = "!";
+
+    showResend();
+
     return;
+
   }
 
-  showOnly("checkingCard");
 
-  try {
-    const body = new URLSearchParams({ action: "verifyEmail", token: token });
-    const res = await fetch(SCRIPT_URL, { method: "POST", body: body });
-    const data = await res.json();
+  google.script.run
 
-    if (data.success) {
-      showOnly("verifiedCard");
-    } else {
-      showOnly("invalidCard");
-    }
-  } catch (err) {
-    showOnly("invalidCard");
-  }
-})();
+    .withSuccessHandler(result => {
 
-$("showResendBtn").addEventListener("click", () => showOnly("resendCard"));
+      if (result.success) {
 
-// ------------------------------------------------------------
-// Resend form
-// ------------------------------------------------------------
-function isValidEmail(email) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        label.textContent = "ENTRY APPROVED";
+
+        title.textContent =
+          "Email verified.";
+
+        message.textContent =
+          "Your account now has a verified entry stamp.";
+
+        seal.textContent = "✓";
+
+      } else {
+
+        label.textContent =
+          result.expired
+            ? "STAMP EXPIRED"
+            : "INVALID STAMP";
+
+        title.textContent =
+          result.message || "Verification failed.";
+
+        message.textContent =
+          "You can request a fresh verification email below.";
+
+        seal.textContent = "!";
+
+        showResend();
+
+      }
+
+    })
+
+    .withFailureHandler(error => {
+
+      console.error(error);
+
+      label.textContent = "ERROR";
+
+      title.textContent =
+        "We couldn't verify your email.";
+
+      message.textContent =
+        "Please request a new verification email.";
+
+      seal.textContent = "!";
+
+      showResend();
+
+    })
+
+    .verifyEmail(token);
+
 }
 
-const resendForm = $("resendForm");
-const resendBtn = $("resendBtn");
 
-resendForm.addEventListener("submit", async (e) => {
-  e.preventDefault();
+resendButton.addEventListener("click", () => {
 
-  const banner = $("resendBanner");
-  banner.hidden = true;
+  const email = resendEmail.value.trim();
 
-  const email = $("resendEmail").value.trim();
-  const errorEl = $("err-resendEmail");
-  const field = $("resendEmail").closest(".field");
+  const emailPattern =
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-  if (!email || !isValidEmail(email)) {
-    field.classList.add("has-error");
-    errorEl.textContent = "Please enter a valid email address.";
+
+  if (!emailPattern.test(email)) {
+
+    resendStatus.textContent =
+      "Please enter a valid email address.";
+
+    resendStatus.className =
+      "status error";
+
     return;
+
   }
-  field.classList.remove("has-error");
-  errorEl.textContent = "";
 
-  resendBtn.disabled = true;
-  resendBtn.querySelector(".btn-label").textContent = "Sending...";
-  resendBtn.querySelector(".btn-spinner").hidden = false;
 
-  try {
-    const body = new URLSearchParams({ action: "resendVerification", email: email });
-    const res = await fetch(SCRIPT_URL, { method: "POST", body: body });
-    const data = await res.json();
+  resendButton.disabled = true;
 
-    banner.hidden = false;
-    if (data.success) {
-      banner.classList.add("ok");
-      banner.textContent = "A new verification email is on its way. Check your inbox!";
-    } else {
-      banner.classList.remove("ok");
-      banner.textContent = data.message || "We couldn't find an account with that email.";
-    }
-  } catch (err) {
-    banner.hidden = false;
-    banner.classList.remove("ok");
-    banner.textContent = "Could not reach the server. Please try again.";
-  } finally {
-    resendBtn.disabled = false;
-    resendBtn.querySelector(".btn-label").textContent = "Resend verification email";
-    resendBtn.querySelector(".btn-spinner").hidden = true;
-  }
+  resendButton.textContent =
+    "SENDING...";
+
+  resendStatus.textContent = "";
+
+
+  google.script.run
+
+    .withSuccessHandler(result => {
+
+      resendButton.disabled = false;
+
+      resendButton.textContent =
+        "SEND A NEW VERIFICATION EMAIL";
+
+
+      resendStatus.textContent =
+        result.message;
+
+
+      resendStatus.className =
+        result.success
+          ? "status success"
+          : "status error";
+
+    })
+
+    .withFailureHandler(error => {
+
+      console.error(error);
+
+      resendButton.disabled = false;
+
+      resendButton.textContent =
+        "SEND A NEW VERIFICATION EMAIL";
+
+      resendStatus.textContent =
+        "Something went wrong. Please try again.";
+
+      resendStatus.className =
+        "status error";
+
+    })
+
+    .resendVerification(email);
+
 });
+
+
+verifyToken();
+
+</script>
